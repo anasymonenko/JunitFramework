@@ -1,5 +1,5 @@
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -10,14 +10,19 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class BasketCheckoutTest {
 
     private static WebDriver driver;
 
+    public static final String BOOK_PRICE = "9.38";
+
     public double parseToDouble (WebElement element){
-        double doubleElement = Double.parseDouble(element.getText().replace(",",".")
+        return Double.parseDouble(element.getText().replace(",",".")
                 .replace("€","").trim());
-        return doubleElement;
     }
 
     @BeforeAll
@@ -51,8 +56,11 @@ public class BasketCheckoutTest {
 
         WebElement itemTotal = driver.findElement(By.xpath("//p[@class = 'item-total']"));
         WebElement basketTotal = driver.findElement(By.xpath("//dl[@class = 'total']/dd"));
-        Assertions.assertEquals(parseToDouble(itemTotal), parseToDouble(basketTotal),
-                "Totals are not equal!");
+
+        assertAll("Check Order Subtotal and Order Total ",
+                () -> assertEquals(Double.parseDouble(BOOK_PRICE), parseToDouble(itemTotal), "Basket Total is incorrect"),
+                () -> assertEquals(Double.parseDouble(BOOK_PRICE), parseToDouble(basketTotal), "Basket Subtotal is incorrect")
+        );
 
         WebElement checkoutButton = driver.findElement(By.xpath("//div[@class = 'checkout-head-wrap']//" +
                 "a[@class = 'checkout-btn btn original-bucket']"));
@@ -63,8 +71,11 @@ public class BasketCheckoutTest {
 
         WebElement orderSummaryTotal = driver.findElement(By.xpath("//dd[@class = 'text-right total-price']"));
         WebElement orderSummarySubtotal = driver.findElement(By.xpath("//dd[@class = 'text-right']"));
-        Assertions.assertEquals(parseToDouble(orderSummaryTotal), parseToDouble(orderSummarySubtotal),
-                "Order Summary totals are not equal!");
+
+        assertAll("Check the following final review",
+                () -> assertEquals(Double.parseDouble(BOOK_PRICE),parseToDouble(orderSummaryTotal), "Order Total is incorrect"),
+                () -> assertEquals(Double.parseDouble(BOOK_PRICE),parseToDouble(orderSummarySubtotal), "Order Subtotal is incorrect")
+        );
         }
 
     @AfterAll
